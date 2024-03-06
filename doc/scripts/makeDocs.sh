@@ -1,8 +1,8 @@
-#!/bin/bash
+#!/bin/sh
 
 # add x for debugging
 set -eu
-VERSION=`grep version ../package.json | sed 's/.*"version": "\(.*\)",.*/\1/'`
+VERSION=$(grep version ../package.json | sed 's/.*"version": "\(.*\)",.*/\1/')
 OUTPUT_NAME="json-formula-specification"
 
 # define the pandoc docker container
@@ -26,10 +26,10 @@ mkdir -p output
 
 # check the current path
 # and get its parent
-CURRENT_PATH=`pwd`
+CURRENT_PATH=$(pwd)
 echo "CURRENT_PATH = ${CURRENT_PATH}"
-if [ "${machine}" == "MinGw" ]; then
-	CURRENT_PATH=/`pwd`
+if [ "${machine}" = "MinGw" ]; then
+	CURRENT_PATH=/$(pwd)
 fi
 PARENT_PATH="$(dirname "${CURRENT_PATH}")"
 # echo "Parent = $PARENT_PATH"
@@ -39,19 +39,18 @@ PARENT_PATH="$(dirname "${CURRENT_PATH}")"
 convertOne() {
 
 	# make sure we have the docker images
-	if [[ "$(docker images -q "${PANDOC_IMG}" 2> /dev/null)" == "" ]]; then
+	if [ "$(docker images -q "${PANDOC_IMG}" 2> /dev/null)" = "" ]; then
 		echo "Pulling Pandoc Docker image"
 		docker pull "${PANDOC_IMG}"
 	fi
 
-	if [[ "$(docker images -q "${AD_DOCKER_IMG}" 2> /dev/null)" == "" ]]; then
+	if [ "$(docker images -q "${AD_DOCKER_IMG}" 2> /dev/null)" = "" ]; then
 		echo "Pulling AsciiDoc Docker image"
 		docker pull "${AD_DOCKER_IMG}"
 	fi
 
 	# compute the base name
 	filename=$(basename -- "$1")
-	extension="${filename##*.}"
 	filename="${filename%.*}"
 	BASE_NAME=$filename
 	echo "BaseName = $BASE_NAME"
@@ -64,7 +63,7 @@ convertOne() {
 	node ./scripts/modFunctionsADoc.js
 
 	# Create the HTML version
-	echo "Converting "${BASE_NAME}".adoc to HTML"
+	echo "Converting ${BASE_NAME}.adoc to HTML"
 	docker run --rm -v "${CURRENT_PATH}":"${CURRENT_PATH}" -w "${CURRENT_PATH}" --platform "${machine}"\
 			-v "${CURRENT_PATH}/fonts":"${CURRENT_PATH}/fonts"	\
 			-v "${PARENT_PATH}/antlr":"${CURRENT_PATH}/antlr"	\
@@ -77,7 +76,7 @@ convertOne() {
 			-o "${OUTPUT_NAME}-${VERSION}".html "${BASE_NAME}".adoc
 
 	# Create the PDF version
-	echo "Converting "${BASE_NAME}".adoc to PDF"
+	echo "Converting ${BASE_NAME}.adoc to PDF"
 	docker run --rm -v "${CURRENT_PATH}":"${CURRENT_PATH}" -w "${CURRENT_PATH}" --platform "${machine}"\
 			-v "${CURRENT_PATH}/fonts":"${CURRENT_PATH}/fonts"	\
 			-v "${PARENT_PATH}/antlr":"${CURRENT_PATH}/antlr"	\
