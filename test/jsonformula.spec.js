@@ -136,7 +136,7 @@ function executeTest(desc, tst) {
   try {
     result = jsonFormula.search(tst.expression, data, globals, language);
   } catch (e) {
-    expect(tst.error).not.toBeUndefined();
+    expect(e.name).not.toBeUndefined();
     expect(e.name).toBe(tst.error);
     return;
   }
@@ -179,7 +179,7 @@ function executeTestWithFields(desc, tst) {
 const suites = [
   'basic', 'boolean',
   'current', 'docSamples', 'escape',
-  'filters', 'functions',
+  'filters', 'functionArgs', 'functions',
   'identifiers', 'indices',
   'literal', 'multiselect',
   'pipe', 'slice', 'specSamples',
@@ -195,12 +195,14 @@ suites.forEach(suite => {
     }
   });
 
-  describe(`${suite} with fields`, () => {
-    const tests = toTestFmt(suite);
-    if (tests.length) {
-      test.each(tests)('%s', executeTestWithFields);
-    }
-  });
+  if (suite !== 'functionArgs') {
+    describe(`${suite} with fields`, () => {
+      const tests = toTestFmt(suite);
+      if (tests.length) {
+        test.each(tests)('%s', executeTestWithFields);
+      }
+    });
+  }
 });
 
 describe('test precedence', () => {

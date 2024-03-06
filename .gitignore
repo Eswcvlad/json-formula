@@ -23,3 +23,4 @@ doc/functions.md
 doc/functions.adoc
 
 coverage/
+test-results.json
